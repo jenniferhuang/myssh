@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 映射文件需要一个dtd来指定格式 -->
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.jennifer.domain" >
+  <class name="Employee" table="employee">
+  <id name="id" type="java.lang.Integer">
+  <column name="id" precision="22" scale="0"/>
+  <generator class="sequence">
+  <param name="sequence">emp_seq</param>
+  </generator>
+  </id>   
+  <property name="name" type="java.lang.String">
+  <column name="name" not-null="true" length="32"></column>
+  </property>
+  <property name="pwd" type="java.lang.String">
+  <column name="pwd" not-null="true" length="32"></column>
+  </property>
+  <property name="grade" type="java.lang.Integer">
+  <column name="grade" not-null="false" length="3"></column>
+  </property>
+  <property name="email" type="java.lang.String" >
+  <column name="email" not-null="false" length="64"></column>
+  </property>
+  <property name="hiredate" type="java.util.Date">
+  <column name="hiredate" not-null="false"></column>
+  </property>
+  <many-to-one name="department" class="com.jennifer.domain.Department" fetch="select">
+      <column name="dept_id" precision="22" scale="0"/>
+  </many-to-one>
+   </class>
+</hibernate-mapping>

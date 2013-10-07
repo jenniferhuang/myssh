@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+<bean id="user" class="com.jennifer.test.User">
+<property name="username" value="测试"/>
+</bean>
+
+<!-- hibernate的核心，就被spring接管了hibernate.cfg.xml -->
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+<property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:orcl"/>
+<property name="username" value="huangzf"/>
+<property name="password" value="huangzf"/>
+<!-- 配置连接池 -->
+<property name="initialSize" value="3"/>
+<property name="maxActive" value="250"/>
+<property name="maxIdle" value="2"/>
+<property name="minIdle" value="1"/>
+</bean>
+
+<!-- 将hibernate的会话工厂配置成一个bean -->
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+<property name="dataSource" ref="dataSource"/>
+<property name="mappingResources">
+  <list>
+    <value>com/jennifer/domain/Employee.hbm.xml</value>
+    <value>com/jennifer/domain/Department.hbm.xml</value>
+  </list>
+</property>
+<property name="hibernateProperties">
+  <value>
+    hibernate.dialect=org.hibernate.dialect.OracleDialect
+	hibernate.hbm2ddl.auto=update
+	hibernate.show_sql=true
+	hibernate.cache.use_second_level_cache=true  <!-- 配置了hibernate二级缓存 -->
+    hibernate.cache.provider_class=org.hibernate.cache.EhCacheProvider
+    hibernate.generate_statistics=true	 
+  </value>
+</property>
+</bean>
+
+<!-- action配置成bean -->
+<bean name="/login" class="com.jennifer.web.action.LoginAction">
+<property name="employeeServiceInter" ref="employeeService"></property>
+</bean>
+<bean name="/employee" class="com.jennifer.web.action.EmployeeAction">
+<property name="employeeService" ref="employeeService"></property>
+<property name="departmentService" ref="departmentService"></property>
+</bean>
+
+
+<!-- Service业务层配置bean -->
+<bean id="employeeService" class="com.jennifer.service.imp.EmployeeService">
+<property name="sf" ref="sessionFactory"/>
+</bean>
+
+<bean id="departmentService" class="com.jennifer.service.imp.DepartmentService">
+<property name="sf" ref="sessionFactory"></property>
+</bean>
+
+
+<!-- 配置事务管理器， 统一管理sessionFactory事务 -->
+<bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+<property name="sessionFactory" ref="sessionFactory"/>
+</bean>
+<!-- 启用事务注解 -->
+<tx:annotation-driven transaction-manager="txManager"/>
+
+
+			
+</beans>
